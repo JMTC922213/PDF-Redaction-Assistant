@@ -129,7 +129,6 @@ body {
 .thumb-sheet {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1.3;
   background: var(--sheet);
   border: 1px solid var(--border);
   border-radius: calc(var(--radius) - 4px);
@@ -137,6 +136,7 @@ body {
   box-shadow: var(--thumb-shadow);
   transition: border-color 140ms ease, box-shadow 140ms ease;
 }
+.thumb-sheet canvas { display: block; width: 100%; height: auto; }
 .thumb.is-active .thumb-sheet {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent);
@@ -183,6 +183,7 @@ body {
   border-radius: var(--paper-radius);
   border: var(--paper-border);
 }
+.pdf-canvas { display: block; border-radius: var(--paper-radius); }
 
 /* RIGHT ENTITY PANEL */
 .ents {

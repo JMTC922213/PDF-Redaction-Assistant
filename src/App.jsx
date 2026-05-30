@@ -1,37 +1,70 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TopBar from './components/TopBar.jsx'
 import ThumbnailRail from './components/ThumbnailRail.jsx'
 import PdfViewer from './components/PdfViewer.jsx'
 import EntityPanel from './components/EntityPanel.jsx'
+import { usePdfDocument } from './hooks/usePdfDocument.js'
+
+const ZOOM_STEP = 0.2
+const ZOOM_MIN = 0.5
+const ZOOM_MAX = 3
+
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 
 /**
- * App — owns the top-level application state and lays out the three panels.
+ * App — owns the top-level state and lays out the three panels.
  *
- * Status drives which "screen" the shell shows:
- *   empty   → upload / dropzone
- *   loading → skeletons while pdf.js parses (wired in a later step)
- *   ready   → document + entities
- *   error   → friendly failure message
- *
- * For this step the shell is static at `empty`; uploading a file only captures
- * its name. pdf.js rendering and entity extraction arrive in the next steps.
+ * State here is the single source of truth the panels read from:
+ *   file        → the chosen File (drives loading via usePdfDocument)
+ *   currentPage → which page the viewer + rail consider active
+ *   zoom        → render scale multiplier (1 = 100%)
+ * Document status/pdf/numPages come from the usePdfDocument hook.
  */
 export default function App() {
-  const [status, setStatus] = useState('empty')
-  const [fileName, setFileName] = useState(null)
+  const [file, setFile] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [zoom, setZoom] = useState(1)
 
-  function handleFile(file) {
-    if (!file || file.type !== 'application/pdf') return
-    setFileName(file.name)
-    // TODO(step 2): hand the File to pdf.js via usePdfDocument and flip status.
+  const { status, pdf, numPages, error } = usePdfDocument(file)
+
+  // Whenever a new document loads, snap back to page 1.
+  useEffect(() => {
+    if (pdf) setCurrentPage(1)
+  }, [pdf])
+
+  function handleFile(f) {
+    if (!f || f.type !== 'application/pdf') return
+    setFile(f)
   }
+
+  const goToPage = (n) => setCurrentPage(clamp(n, 1, numPages || 1))
+  const zoomIn = () => setZoom((z) => clamp(+(z + ZOOM_STEP).toFixed(2), ZOOM_MIN, ZOOM_MAX))
+  const zoomOut = () => setZoom((z) => clamp(+(z - ZOOM_STEP).toFixed(2), ZOOM_MIN, ZOOM_MAX))
 
   return (
     <div className="rm rm-clarity">
-      <TopBar status={status} fileName={fileName} onFile={handleFile} />
+      <TopBar status={status} fileName={file?.name} onFile={handleFile} />
       <div className="rm-body">
-        <ThumbnailRail status={status} />
-        <PdfViewer status={status} onFile={handleFile} />
+        <ThumbnailRail
+          status={status}
+          pdf={pdf}
+          numPages={numPages}
+          currentPage={currentPage}
+          onSelectPage={goToPage}
+        />
+        <PdfViewer
+          status={status}
+          error={error}
+          pdf={pdf}
+          numPages={numPages}
+          currentPage={currentPage}
+          zoom={zoom}
+          onFile={handleFile}
+          onPrev={() => goToPage(currentPage - 1)}
+          onNext={() => goToPage(currentPage + 1)}
+          onZoomIn={zoomIn}
+          onZoomOut={zoomOut}
+        />
         <EntityPanel status={status} />
       </div>
     </div>

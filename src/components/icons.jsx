@@ -66,3 +66,35 @@ export function IconLayers({ size = 22 }) {
     </svg>
   )
 }
+
+export function IconChevronLeft({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M15 6l-6 6 6 6" />
+    </svg>
+  )
+}
+
+export function IconChevronRight({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  )
+}
+
+export function IconMinus({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M5 12h14" />
+    </svg>
+  )
+}
+
+export function IconPlus({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  )
+}
