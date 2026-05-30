@@ -1,0 +1,15 @@
+# dependencies & build output (regenerated)
+node_modules
+dist
+.vite
+
+# OS / editor junk
+.DS_Store
+*.local
+
+# Word temp/lock files
+~$*
+
+# assignment brief & design references (not part of the app)
+Option_B_Task_Brief.docx
+design_handoff_pdf_redaction_assistant/
