@@ -212,11 +212,11 @@ body {
 .hl-search { background: var(--search-hi); box-shadow: inset 0 -2px 0 var(--search-solid); cursor: default; }
 .hl-search.is-selected { box-shadow: inset 0 -2px 0 var(--search-solid), 0 0 0 2px var(--search-solid); }
 
-/* thumbnail entity marker dots */
-.tdots { position: absolute; top: 6px; left: 6px; display: flex; flex-direction: column; gap: 4px; }
-.tdot { height: 5px; border-radius: 3px; }
-.tdot-date { width: 22px; background: var(--date-solid); }
-.tdot-name { width: 15px; background: var(--name-solid); }
+/* thumbnail entity marker squares — equal-sided so they read as indicators */
+.tdots { position: absolute; top: 6px; left: 6px; display: flex; gap: 4px; }
+.tdot { width: 8px; height: 8px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(255,255,255,.7); }
+.tdot-date { background: var(--date-solid); }
+.tdot-name { background: var(--name-solid); }
 
 /* RIGHT ENTITY PANEL */
 .ents {
