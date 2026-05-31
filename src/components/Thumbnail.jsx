@@ -7,7 +7,7 @@ const THUMB_WIDTH = 130 // CSS px; the rail is 168px wide minus padding
  * chosen so its width lands at THUMB_WIDTH. Clicking jumps the viewer to it; the
  * active page is styled via the `active` class on the wrapper.
  */
-export default function Thumbnail({ pdf, pageNumber, active, onSelect }) {
+export default function Thumbnail({ pdf, pageNumber, active, hasDate, hasName, onSelect }) {
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -59,6 +59,12 @@ export default function Thumbnail({ pdf, pageNumber, active, onSelect }) {
     >
       <div className="thumb-sheet">
         <canvas ref={canvasRef} />
+        {(hasDate || hasName) && (
+          <div className="tdots">
+            {hasDate && <span className="tdot tdot-date" />}
+            {hasName && <span className="tdot tdot-name" />}
+          </div>
+        )}
       </div>
       <div className="thumb-no">{pageNumber}</div>
     </button>

@@ -4,7 +4,10 @@ import Thumbnail from './Thumbnail.jsx'
  * ThumbnailRail — left panel. Renders one Thumbnail per page once the document
  * is ready; a skeleton strip while loading; an empty-state placeholder otherwise.
  */
-export default function ThumbnailRail({ status, pdf, numPages, currentPage, onSelectPage }) {
+export default function ThumbnailRail({ status, pdf, numPages, currentPage, entities = [], onSelectPage }) {
+  // Which pages contain dates / names, so each thumbnail can show marker dots.
+  const datePages = new Set(entities.filter((e) => e.type === 'date').map((e) => e.page))
+  const namePages = new Set(entities.filter((e) => e.type === 'name').map((e) => e.page))
   return (
     <aside className="rail">
       <div className="rail-head">Pages</div>
@@ -29,6 +32,8 @@ export default function ThumbnailRail({ status, pdf, numPages, currentPage, onSe
               pdf={pdf}
               pageNumber={n}
               active={n === currentPage}
+              hasDate={datePages.has(n)}
+              hasName={namePages.has(n)}
               onSelect={() => onSelectPage(n)}
             />
           ))}

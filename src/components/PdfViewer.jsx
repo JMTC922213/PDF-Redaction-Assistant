@@ -3,6 +3,7 @@ import { openPdfDialog } from '../lib/openPdfDialog.js'
 import { IconUpload } from './icons.jsx'
 import ViewerToolbar from './ViewerToolbar.jsx'
 import PageCanvas from './PageCanvas.jsx'
+import HighlightLayer from './HighlightLayer.jsx'
 
 /**
  * PdfViewer — centre panel. Switches on `status`:
@@ -13,9 +14,13 @@ import PageCanvas from './PageCanvas.jsx'
  */
 export default function PdfViewer({
   status, error, pdf, numPages, currentPage, zoom,
+  entities, pageModels, selectedId, onSelectEntity,
   onFile, onPrev, onNext, onZoomIn, onZoomOut,
 }) {
   const [dragging, setDragging] = useState(false)
+  // The live viewport of the rendered page; reported by PageCanvas after each
+  // render. Highlights are computed against it so they track zoom/page changes.
+  const [viewport, setViewport] = useState(null)
 
   function handleDrop(e) {
     e.preventDefault()
@@ -94,7 +99,14 @@ export default function PdfViewer({
       />
       <div className="viewer-canvas">
         <div className="sheet">
-          <PageCanvas pdf={pdf} pageNumber={currentPage} scale={zoom} />
+          <PageCanvas pdf={pdf} pageNumber={currentPage} scale={zoom} onViewport={setViewport} />
+          <HighlightLayer
+            viewport={viewport}
+            model={pageModels[currentPage]}
+            entities={entities.filter((e) => e.page === currentPage)}
+            selectedId={selectedId}
+            onSelectEntity={onSelectEntity}
+          />
         </div>
       </div>
     </main>

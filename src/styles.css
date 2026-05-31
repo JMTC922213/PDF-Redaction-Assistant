@@ -185,6 +185,35 @@ body {
 }
 .pdf-canvas { display: block; border-radius: var(--paper-radius); }
 
+/* highlight overlay — sits exactly on top of the rendered page */
+.hl-layer { position: absolute; top: 0; left: 0; pointer-events: none; }
+.hl {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: box-shadow 120ms ease;
+}
+.hl-date { background: var(--date-hi); box-shadow: inset 0 -2px 0 var(--date-solid); }
+.hl-name { background: var(--name-hi); box-shadow: inset 0 -2px 0 var(--name-solid); }
+/* low-confidence name: dashed outline, no fill — reads as "verify me" */
+.hl-name.is-low { background: transparent; box-shadow: none; border: 1.5px dashed var(--name-solid); }
+/* selected: a 2px ring in the entity's colour + a one-shot pulse */
+.hl-date.is-selected { box-shadow: inset 0 -2px 0 var(--date-solid), 0 0 0 2px var(--date-solid); }
+.hl-name.is-selected { box-shadow: inset 0 -2px 0 var(--name-solid), 0 0 0 2px var(--name-solid); }
+.hl.is-selected { animation: hl-pulse 1.1s ease-out 1; z-index: 2; }
+@keyframes hl-pulse {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.07); }
+  100% { transform: scale(1); }
+}
+
+/* thumbnail entity marker dots */
+.tdots { position: absolute; top: 6px; left: 6px; display: flex; flex-direction: column; gap: 4px; }
+.tdot { height: 5px; border-radius: 3px; }
+.tdot-date { width: 22px; background: var(--date-solid); }
+.tdot-name { width: 15px; background: var(--name-solid); }
+
 /* RIGHT ENTITY PANEL */
 .ents {
   width: 312px; flex: 0 0 312px;
@@ -252,6 +281,14 @@ body {
 }
 .ent-row.is-active .ent-text { font-weight: 700; color: var(--active-text); }
 .ent-row.is-active .ent-page { color: var(--active-text); }
+
+/* low-confidence name: hollow swatch + muted text so it reads as "verify me" */
+.ent-row.is-low .ent-text { color: var(--muted); }
+.ent-row.is-low .swatch { background: transparent; box-shadow: inset 0 0 0 1.5px var(--name-solid); }
+
+/* the scrollable region holding the two sections */
+.ents-scroll { flex: 1; overflow-y: auto; }
+.ent-empty-row { padding: 8px 12px 10px; color: var(--muted); font-size: 12px; }
 
 /* ===================== CLARITY THEME TOKENS ===================== */
 .rm-clarity {
