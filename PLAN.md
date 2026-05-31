@@ -117,26 +117,34 @@ Derived selectors: `entitiesOnPage(n)`, `byType`, `selectedEntity`, `counts`.
       drag-drop), status state machine. *Verified: build + dev server OK.*
       `chore: scaffold Vite + React app with Clarity design system`
 
-- [ ] **Step 2 — pdf.js load → render pages to canvas + thumbnail rail + nav/zoom.**
+- [x] **Step 2 — pdf.js load → render pages to canvas + thumbnail rail + nav/zoom.**
       `usePdfDocument` hook, worker setup, page render, thumbnail strip with active
       page, page steppers + zoom controls, loading state.
+      `feat: render PDF pages with pdf.js — viewer, thumbnails, nav & zoom`
 
-- [ ] **Step 3 — text model + date/name extractors + entity panel.**
-      Per-page text model (string + offsets), `extractDates`/`extractNames` with
-      stop-list + confidence, entity sections with counts/toggles/filter.
+- [x] **Step 3 — text model + date/name extractors + entity panel.**
+      Per-page text model, `extractDates`/`extractNames` with stop-list +
+      confidence + date-overlap suppression, sections with counts/filter.
+      `feat: extract dates and names with confidence-tiered entity panel`
 
-- [ ] **Step 4 — match→rect mapper + highlight overlays + entity click.**
+- [x] **Step 4 — match→rect mapper + highlight overlays + entity click.**
       The y-flip coordinate mapping, HighlightLayer, click entity → jump + select +
       pulse, multi-highlight, thumbnail entity dots.
+      `feat: overlay entity highlights on the page with the pdf.js y-flip`
 
-- [ ] **Step 5 — polish: keyboard nav, search, active states, loading/error.**
-      `useKeyboardNav` (↑/↓/↵/R), document-wide search with match navigation.
+- [x] **Step 5 — polish: keyboard nav, search, active states.**
+      `useKeyboardNav` (↑/↓/↵), document-wide search with match navigation.
+      `feat: add document-wide search and keyboard navigation`
 
-- [ ] **Step 6 — stretch: redaction mode + pdf-lib rasterized export.**
-      Redact-mode click behavior, popover actions, secure export.
+- [x] **Step 6 — stretch: redaction mode + pdf-lib rasterized export.**
+      Redact-mode click behavior, popover actions, secure rasterized export.
+      Plus proportional-width box accuracy fix.
+      `feat: add redaction mode with secure rasterized PDF export`
 
-- [ ] **Step 7 — README + sample multi-page test PDF + screenshots.**
-      Setup, extraction approach with pattern examples, state model, known limits.
+- [x] **Step 7 — README + sample multi-page test PDF + screenshots.**
+      README (setup, extraction approach, state model, known limits), sample PDF
+      generator. *Screenshot still to be captured by hand (needs a browser).*
+      `docs: add README and sample PDF generator`
 
 ---
 
