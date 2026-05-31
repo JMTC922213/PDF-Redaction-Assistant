@@ -38,8 +38,11 @@ const STOP = new Set([
 // A name "word": a capitalised token, allowing O'Brien / D'Angelo style prefixes
 // and hyphenated/apostrophed forms like Anne-Marie.
 const WORD = "(?:[A-Z]['’])?[A-Z][a-z]+(?:[-'’][A-Za-z]+)*"
-// Two or three such words in a row.
-const NAME_RE = new RegExp(`\\b${WORD}(?:\\s+${WORD}){1,2}\\b`, 'g')
+// Two or three such words separated by a SINGLE whitespace. Using \s (not \s+)
+// means a wide gap ends one candidate and starts another, so "University     Jack
+// Ma" yields "Jack Ma" (the real name) rather than bridging the gap or matching
+// nothing. The list and the on-page highlights stay consistent as a result.
+const NAME_RE = new RegExp(`\\b${WORD}(?:\\s${WORD}){1,2}\\b`, 'g')
 
 /**
  * extractNames(text) → [{ start, end, text, confidence }]

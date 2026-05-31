@@ -33,7 +33,10 @@ export function extractDates(text) {
     re.lastIndex = 0
     let m
     while ((m = re.exec(text)) !== null) {
-      found.push({ start: m.index, end: m.index + m[0].length, text: m[0] })
+      // Skip matches spanning a wide gap (2+ whitespace) — not a contiguous date.
+      if (!/\s{2,}/.test(m[0])) {
+        found.push({ start: m.index, end: m.index + m[0].length, text: m[0] })
+      }
       if (m.index === re.lastIndex) re.lastIndex++ // guard against zero-length loops
     }
   }
