@@ -13,6 +13,23 @@ function getMeasureCtx() {
 // box exactly the font's em-height would clip below the baseline.
 const V_PAD = 1.15
 
+// Measure the device x-offset and width of str[a:b] within a fragment of known
+// device width. PDF fonts are proportional, so we measure with a real font and
+// normalise to the fragment's width rather than assuming uniform characters.
+function measureSlice(ctx, str, a, b, fragWidth) {
+  if (ctx && str && fragWidth > 0) {
+    ctx.font = '32px sans-serif'
+    const full = ctx.measureText(str).width || 1
+    const norm = fragWidth / full
+    return {
+      xOffset: ctx.measureText(str.slice(0, a)).width * norm,
+      width: ctx.measureText(str.slice(a, b)).width * norm,
+    }
+  }
+  const len = str.length || 1
+  return { xOffset: fragWidth * (a / len), width: fragWidth * ((b - a) / len) }
+}
+
 /**
  * mapMatchToRects(model, range, viewport) → [{ x, y, w, h }]
  *
@@ -25,11 +42,9 @@ const V_PAD = 1.15
  * AND the bottom-left → top-left Y-flip, so combining it with a fragment's own
  * transform lands the box on the rendered glyphs.
  *
- * For a PARTIAL fragment match we can't assume uniform character widths (PDFs
- * use proportional fonts — "W" ≫ "i"). So we measure the real sub-string width
- * with a canvas and normalise it to the fragment's known device width. This is
- * far more accurate than slicing by character count, which left boxes shifted
- * and too narrow.
+ * Within a fragment, the matched text is split at WIDE whitespace (2+ spaces) so
+ * a single box never spans an obvious gap (e.g. spaced/justified text); normal
+ * single-space words stay as one continuous box.
  */
 export function mapMatchToRects(model, range, viewport) {
   const rects = []
@@ -47,33 +62,33 @@ export function mapMatchToRects(model, range, viewport) {
     const fontHeight = Math.hypot(t[2], t[3])
     const fragWidth = item.width * viewport.scale
     const baseLeft = t[4]
+    const top = t[5] - fontHeight
+    const h = fontHeight * V_PAD
+    const str = item.str ?? ''
 
-    const a = overlapStart - item.start // sub-string start within the fragment
-    const b = overlapEnd - item.start // sub-string end
+    // The matched portion of this fragment, relative to the fragment string.
+    const a = overlapStart - item.start
+    const b = overlapEnd - item.start
+    const sub = str.slice(a, b)
 
-    let xOffset, subWidth
-    const str = item.str
-    if (ctx && str && str.length === charLen && fragWidth > 0) {
-      // Measure with any proportional font; we normalise by total width, so the
-      // absolute font size cancels out and only the relative metrics matter.
-      ctx.font = '32px sans-serif'
-      const full = ctx.measureText(str).width || 1
-      const norm = fragWidth / full
-      xOffset = ctx.measureText(str.slice(0, a)).width * norm
-      subWidth = ctx.measureText(str.slice(a, b)).width * norm
-    } else {
-      // Fallback (no canvas / odd fragment): proportional by character count.
-      xOffset = fragWidth * (a / charLen)
-      subWidth = fragWidth * ((b - a) / charLen)
+    // Split into segments that contain at most single internal spaces; a run of
+    // 2+ whitespace breaks the segment so the gap isn't highlighted.
+    const segRe = /\S(?:\s?\S)*/g
+    let seg
+    let matched = false
+    while ((seg = segRe.exec(sub)) !== null) {
+      matched = true
+      const segA = a + seg.index
+      const segB = segA + seg[0].length
+      const { xOffset, width } = measureSlice(ctx, str, segA, segB, fragWidth)
+      rects.push({ x: baseLeft + xOffset, y: top, w: width, h })
     }
 
-    const h = fontHeight * V_PAD
-    rects.push({
-      x: baseLeft + xOffset,
-      y: t[5] - fontHeight, // top = baseline − em-height (covers ascenders/caps)
-      w: subWidth,
-      h, // extends below the baseline to cover descenders
-    })
+    // Fallback for whitespace-only / measurement-less cases: one box for [a,b].
+    if (!matched) {
+      const { xOffset, width } = measureSlice(ctx, str, a, b, fragWidth)
+      rects.push({ x: baseLeft + xOffset, y: top, w: width, h })
+    }
   }
 
   return rects
