@@ -208,6 +208,38 @@ body {
   100% { transform: scale(1); }
 }
 
+/* redacted entity — solid black bar with a tiny label */
+.hl.is-redacted { background: #15171c; box-shadow: none; border: none; overflow: hidden; cursor: pointer; }
+.hl.is-redacted::after {
+  content: 'REDACTED';
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  font-family: var(--mono-font), monospace; font-size: 7px; letter-spacing: .08em;
+  color: rgba(255, 255, 255, .55); white-space: nowrap;
+}
+
+/* selected-highlight action popover */
+.hl-pop {
+  position: absolute; top: calc(100% + 9px); left: 50%; transform: translateX(-50%);
+  display: flex; background: #1b2330; color: #fff; border-radius: 9px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, .32); white-space: nowrap; z-index: 50;
+}
+.hl-pop::before {
+  content: ''; position: absolute; top: -5px; left: 50%;
+  transform: translateX(-50%) rotate(45deg); width: 10px; height: 10px;
+  background: #1b2330; border-radius: 2px;
+}
+.hl-pop button {
+  display: flex; align-items: center; gap: 6px; background: transparent; border: none;
+  color: #fff; font-size: 12.5px; font-weight: 500; padding: 9px 13px; cursor: pointer;
+  font-family: var(--body-font), system-ui, sans-serif;
+}
+.hl-pop button + button { border-left: 1px solid rgba(255, 255, 255, .12); }
+.hl-pop .pop-redact { color: #fca5a5; font-weight: 600; }
+.hl-pop .pop-ico { font-size: 12px; }
+
+/* on hover, swap the page badge for the Redact action */
+.ent-row:hover .ent-page { display: none; }
+
 /* search matches — magenta, distinct from amber dates and blue names */
 .hl-search { background: var(--search-hi); box-shadow: inset 0 -2px 0 var(--search-solid); cursor: default; }
 .hl-search.is-selected { box-shadow: inset 0 -2px 0 var(--search-solid), 0 0 0 2px var(--search-solid); }

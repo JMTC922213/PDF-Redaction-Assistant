@@ -7,7 +7,7 @@ import EntitySection from './EntitySection.jsx'
  * nothing-found states. Selection is owned by App so the list and the (Step 4)
  * page highlights stay in sync.
  */
-export default function EntityPanel({ status, entities, extracting, selectedId, onSelectEntity }) {
+export default function EntityPanel({ status, entities, extracting, selectedId, onSelectEntity, redactedIds, onToggleRedact }) {
   if (status === 'empty') {
     return (
       <aside className="ents">
@@ -40,8 +40,8 @@ export default function EntityPanel({ status, entities, extracting, selectedId, 
       ) : (
         <>
           <div className="ents-scroll">
-            <EntitySection type="date" label="Dates" items={dates} selectedId={selectedId} onSelectEntity={onSelectEntity} />
-            <EntitySection type="name" label="Names" items={names} selectedId={selectedId} onSelectEntity={onSelectEntity} />
+            <EntitySection type="date" label="Dates" items={dates} selectedId={selectedId} onSelectEntity={onSelectEntity} redactedIds={redactedIds} onToggleRedact={onToggleRedact} />
+            <EntitySection type="name" label="Names" items={names} selectedId={selectedId} onSelectEntity={onSelectEntity} redactedIds={redactedIds} onToggleRedact={onToggleRedact} />
           </div>
           <div className="kbd-bar">
             <span className="kbd-hint"><span className="kbd">↑</span><span className="kbd">↓</span> navigate</span>

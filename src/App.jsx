@@ -6,6 +6,7 @@ import EntityPanel from './components/EntityPanel.jsx'
 import { usePdfDocument } from './hooks/usePdfDocument.js'
 import { useEntities } from './hooks/useEntities.js'
 import { useKeyboardNav } from './hooks/useKeyboardNav.js'
+import { exportRedactedPdf, downloadPdf } from './lib/redactExport.js'
 
 const ZOOM_STEP = 0.2
 const ZOOM_MIN = 0.5
@@ -29,18 +30,47 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [activeSearch, setActiveSearch] = useState(0)
+  const [mode, setMode] = useState('review')
+  const [redactedIds, setRedactedIds] = useState(() => new Set())
+  const [exporting, setExporting] = useState(false)
 
   const { status, pdf, numPages, error } = usePdfDocument(file)
   const { entities, pageModels, extracting } = useEntities(pdf, numPages)
 
-  // Whenever a new document loads, reset page/selection/search.
+  // Whenever a new document loads, reset page/selection/search/redactions.
   useEffect(() => {
     if (pdf) {
       setCurrentPage(1)
       setSelectedId(null)
       setSearchTerm('')
+      setMode('review')
+      setRedactedIds(new Set())
     }
   }, [pdf])
+
+  // Toggle an entity's redaction on/off.
+  const toggleRedact = useCallback((entity) => {
+    setRedactedIds((prev) => {
+      const next = new Set(prev)
+      next.has(entity.id) ? next.delete(entity.id) : next.add(entity.id)
+      return next
+    })
+  }, [])
+
+  async function handleExport() {
+    if (!file || !pdf) return
+    setExporting(true)
+    try {
+      const redactedEntities = entities.filter((e) => redactedIds.has(e.id))
+      const bytes = await exportRedactedPdf({ file, pdf, numPages, pageModels, redactedEntities })
+      downloadPdf(bytes, `redacted-${file.name}`)
+    } catch (err) {
+      console.error('Export failed:', err)
+      alert('Sorry — export failed. See the console for details.')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   function handleFile(f) {
     if (!f || f.type !== 'application/pdf') return
@@ -91,7 +121,7 @@ export default function App() {
     [searchMatches, activeSearch],
   )
 
-  useKeyboardNav({ entities, selectedId, onSelect: selectEntity })
+  useKeyboardNav({ entities, selectedId, onSelect: selectEntity, onRedact: toggleRedact })
 
   const goToPage = (n) => setCurrentPage(clamp(n, 1, numPages || 1))
   const zoomIn = () => setZoom((z) => clamp(+(z + ZOOM_STEP).toFixed(2), ZOOM_MIN, ZOOM_MAX))
@@ -109,6 +139,9 @@ export default function App() {
         activeIndex={activeSearch}
         onNextMatch={() => goSearch(1)}
         onPrevMatch={() => goSearch(-1)}
+        onExport={handleExport}
+        exporting={exporting}
+        redactionCount={redactedIds.size}
       />
       <div className="rm-body">
         <ThumbnailRail
@@ -132,6 +165,10 @@ export default function App() {
           onSelectEntity={selectEntity}
           searchMatches={searchMatches}
           activeSearchId={searchMatches[activeSearch]?.id ?? null}
+          mode={mode}
+          onModeChange={setMode}
+          redactedIds={redactedIds}
+          onToggleRedact={toggleRedact}
           onFile={handleFile}
           onPrev={() => goToPage(currentPage - 1)}
           onNext={() => goToPage(currentPage + 1)}
@@ -144,6 +181,8 @@ export default function App() {
           extracting={extracting}
           selectedId={selectedId}
           onSelectEntity={selectEntity}
+          redactedIds={redactedIds}
+          onToggleRedact={toggleRedact}
         />
       </div>
     </div>

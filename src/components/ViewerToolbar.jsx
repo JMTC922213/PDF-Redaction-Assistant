@@ -7,7 +7,10 @@ import { IconChevronLeft, IconChevronRight, IconMinus, IconPlus } from './icons.
  * It's a "dumb" control bar: it never holds state, it just calls the handlers
  * App gives it. App owns currentPage/zoom so the rail and canvas stay in sync.
  */
-export default function ViewerToolbar({ currentPage, numPages, zoom, onPrev, onNext, onZoomOut, onZoomIn }) {
+export default function ViewerToolbar({
+  currentPage, numPages, zoom, mode, onModeChange,
+  onPrev, onNext, onZoomOut, onZoomIn,
+}) {
   const pct = Math.round(zoom * 100)
   return (
     <div className="viewer-toolbar">
@@ -19,6 +22,11 @@ export default function ViewerToolbar({ currentPage, numPages, zoom, onPrev, onN
         <button className="vt-btn" onClick={onNext} disabled={currentPage >= numPages} aria-label="Next page">
           <IconChevronRight />
         </button>
+      </div>
+
+      <div className="mode-seg" role="tablist" aria-label="Mode">
+        <button className={mode === 'review' ? 'is-on' : ''} onClick={() => onModeChange('review')}>Review</button>
+        <button className={mode === 'redact' ? 'is-on' : ''} onClick={() => onModeChange('redact')}>Redact</button>
       </div>
 
       <div className="vt-right">

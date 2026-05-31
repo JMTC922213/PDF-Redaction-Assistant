@@ -12,9 +12,17 @@ import { mapMatchToRects } from '../lib/mapMatchToRects.js'
  */
 export default function HighlightLayer({
   viewport, model, entities, selectedId, onSelectEntity,
+  mode = 'review', redactedIds, onToggleRedact,
   searchMatches = [], activeSearchId,
 }) {
   if (!viewport || !model) return null
+
+  // In redact mode (or when un-redacting) a click toggles redaction; otherwise
+  // it selects the entity.
+  const clickEntity = (e) => {
+    if (redactedIds?.has(e.id) || mode === 'redact') onToggleRedact(e)
+    else onSelectEntity(e)
+  }
 
   return (
     <div className="hl-layer" style={{ width: viewport.width, height: viewport.height }}>
@@ -26,7 +34,11 @@ export default function HighlightLayer({
             type={e.type}
             selected={e.id === selectedId}
             low={e.confidence === 'low'}
-            onSelect={() => onSelectEntity(e)}
+            redacted={redactedIds?.has(e.id)}
+            showPopover={mode === 'review'}
+            text={e.text}
+            onSelect={() => clickEntity(e)}
+            onRedact={() => onToggleRedact(e)}
           />
         )),
       )}

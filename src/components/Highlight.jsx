@@ -1,12 +1,16 @@
 import { useEffect, useRef } from 'react'
+import HighlightPopover from './HighlightPopover.jsx'
 
 /**
- * Highlight — one absolutely-positioned overlay box over a detected entity.
- * Colour comes from the type (date/name); low-confidence names render as a
- * dashed outline. The selected highlight gets a ring + a one-shot pulse and
- * scrolls itself into view when it becomes selected.
+ * Highlight — one absolutely-positioned overlay box over a detected entity (or
+ * a search hit). Colour comes from the type; low-confidence names render as a
+ * dashed outline; redacted entities render as a solid black "REDACTED" bar.
+ * The selected entity gets a ring, a one-shot pulse, scrolls into view, and
+ * shows the action popover.
  */
-export default function Highlight({ rect, type, selected, low, onSelect }) {
+export default function Highlight({
+  rect, type, selected, low, redacted, showPopover, text, onSelect, onRedact,
+}) {
   const ref = useRef(null)
 
   useEffect(() => {
@@ -14,7 +18,10 @@ export default function Highlight({ rect, type, selected, low, onSelect }) {
   }, [selected])
 
   const cls =
-    'hl hl-' + type + (selected ? ' is-selected' : '') + (low ? ' is-low' : '')
+    'hl hl-' + type +
+    (selected ? ' is-selected' : '') +
+    (low ? ' is-low' : '') +
+    (redacted ? ' is-redacted' : '')
 
   return (
     <div
@@ -22,6 +29,14 @@ export default function Highlight({ rect, type, selected, low, onSelect }) {
       className={cls}
       style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h }}
       onClick={onSelect}
-    />
+    >
+      {selected && showPopover && !redacted && (
+        <HighlightPopover
+          text={text}
+          onRedact={onRedact}
+          onJump={() => ref.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })}
+        />
+      )}
+    </div>
   )
 }

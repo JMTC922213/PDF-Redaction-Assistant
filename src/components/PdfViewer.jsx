@@ -16,6 +16,7 @@ export default function PdfViewer({
   status, error, pdf, numPages, currentPage, zoom,
   entities, pageModels, selectedId, onSelectEntity,
   searchMatches = [], activeSearchId,
+  mode, onModeChange, redactedIds, onToggleRedact,
   onFile, onPrev, onNext, onZoomIn, onZoomOut,
 }) {
   const [dragging, setDragging] = useState(false)
@@ -93,6 +94,8 @@ export default function PdfViewer({
         currentPage={currentPage}
         numPages={numPages}
         zoom={zoom}
+        mode={mode}
+        onModeChange={onModeChange}
         onPrev={onPrev}
         onNext={onNext}
         onZoomIn={onZoomIn}
@@ -107,6 +110,9 @@ export default function PdfViewer({
             entities={entities.filter((e) => e.page === currentPage)}
             selectedId={selectedId}
             onSelectEntity={onSelectEntity}
+            mode={mode}
+            redactedIds={redactedIds}
+            onToggleRedact={onToggleRedact}
             searchMatches={searchMatches.filter((m) => m.page === currentPage)}
             activeSearchId={activeSearchId}
           />

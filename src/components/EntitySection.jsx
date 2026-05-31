@@ -10,7 +10,7 @@ import EntityRow from './EntityRow.jsx'
  * Owns its own `open` and `filter` state because those are purely local view
  * concerns — App doesn't need to know whether a section is expanded.
  */
-export default function EntitySection({ type, label, items, selectedId, onSelectEntity }) {
+export default function EntitySection({ type, label, items, selectedId, onSelectEntity, redactedIds, onToggleRedact }) {
   const [open, setOpen] = useState(true)
   const [filter, setFilter] = useState('')
 
@@ -48,7 +48,9 @@ export default function EntitySection({ type, label, items, selectedId, onSelect
                 key={e.id}
                 entity={e}
                 active={e.id === selectedId}
+                redacted={redactedIds?.has(e.id)}
                 onSelect={() => onSelectEntity(e)}
+                onToggleRedact={() => onToggleRedact(e)}
               />
             ))}
             {filtered.length === 0 && <div className="ent-empty-row">No matches</div>}

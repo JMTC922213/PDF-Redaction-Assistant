@@ -8,6 +8,7 @@ import { IconShield, IconFile, IconSearch } from './icons.jsx'
 export default function TopBar({
   status, fileName, onFile,
   searchTerm, onSearchChange, matchCount, activeIndex, onNextMatch, onPrevMatch,
+  onExport, exporting, redactionCount,
 }) {
   const ready = status === 'ready'
 
@@ -52,8 +53,8 @@ export default function TopBar({
       )}
 
       <div className="topbar-actions">
-        <button className="btn btn-ghost" disabled={!ready}>
-          Export PDF
+        <button className="btn btn-ghost" disabled={!ready || exporting} onClick={onExport}>
+          {exporting ? 'Exporting…' : redactionCount ? `Export PDF (${redactionCount})` : 'Export PDF'}
         </button>
         <button className="btn btn-primary" onClick={() => openPdfDialog(onFile)}>
           Upload PDF
