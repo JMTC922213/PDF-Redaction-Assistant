@@ -10,7 +10,10 @@ import { mapMatchToRects } from '../lib/mapMatchToRects.js'
  * once); the selected one is emphasised. Boxes are recomputed from the live
  * viewport, so they stay aligned through zoom and page changes.
  */
-export default function HighlightLayer({ viewport, model, entities, selectedId, onSelectEntity }) {
+export default function HighlightLayer({
+  viewport, model, entities, selectedId, onSelectEntity,
+  searchMatches = [], activeSearchId,
+}) {
   if (!viewport || !model) return null
 
   return (
@@ -24,6 +27,17 @@ export default function HighlightLayer({ viewport, model, entities, selectedId, 
             selected={e.id === selectedId}
             low={e.confidence === 'low'}
             onSelect={() => onSelectEntity(e)}
+          />
+        )),
+      )}
+
+      {searchMatches.flatMap((m) =>
+        mapMatchToRects(model, m.range, viewport).map((rect, i) => (
+          <Highlight
+            key={`${m.id}-${i}`}
+            rect={rect}
+            type="search"
+            selected={m.id === activeSearchId}
           />
         )),
       )}

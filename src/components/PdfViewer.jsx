@@ -15,6 +15,7 @@ import HighlightLayer from './HighlightLayer.jsx'
 export default function PdfViewer({
   status, error, pdf, numPages, currentPage, zoom,
   entities, pageModels, selectedId, onSelectEntity,
+  searchMatches = [], activeSearchId,
   onFile, onPrev, onNext, onZoomIn, onZoomOut,
 }) {
   const [dragging, setDragging] = useState(false)
@@ -106,6 +107,8 @@ export default function PdfViewer({
             entities={entities.filter((e) => e.page === currentPage)}
             selectedId={selectedId}
             onSelectEntity={onSelectEntity}
+            searchMatches={searchMatches.filter((m) => m.page === currentPage)}
+            activeSearchId={activeSearchId}
           />
         </div>
       </div>

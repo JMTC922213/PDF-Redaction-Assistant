@@ -208,6 +208,10 @@ body {
   100% { transform: scale(1); }
 }
 
+/* search matches — magenta, distinct from amber dates and blue names */
+.hl-search { background: var(--search-hi); box-shadow: inset 0 -2px 0 var(--search-solid); cursor: default; }
+.hl-search.is-selected { box-shadow: inset 0 -2px 0 var(--search-solid), 0 0 0 2px var(--search-solid); }
+
 /* thumbnail entity marker dots */
 .tdots { position: absolute; top: 6px; left: 6px; display: flex; flex-direction: column; gap: 4px; }
 .tdot { height: 5px; border-radius: 3px; }
@@ -298,6 +302,7 @@ body {
   --canvas-bg:#e7e9ee; --paper:#ffffff; --sheet:#ffffff; --ink-faint:#e6e8ec;
   --date-hi: rgba(245,196,0,.42); --date-solid: oklch(0.78 0.15 85);
   --name-hi: rgba(58,118,240,.26); --name-solid: oklch(0.6 0.17 258);
+  --search-hi: oklch(0.62 0.2 330 / .26); --search-solid: oklch(0.58 0.22 330);
   --active-bg: oklch(0.55 0.17 264 / .1); --active-ring: inset 0 0 0 1px oklch(0.55 0.17 264 / .35); --active-text: oklch(0.45 0.17 264);
   --head-font:'Public Sans'; --body-font:'Public Sans'; --mono-font:'IBM Plex Mono'; --doc-font:'Public Sans';
   --radius:10px; --logo-radius:7px;

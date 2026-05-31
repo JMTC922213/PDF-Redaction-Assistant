@@ -38,10 +38,17 @@ export default function EntityPanel({ status, entities, extracting, selectedId, 
           No dates or names detected in this document.
         </div>
       ) : (
-        <div className="ents-scroll">
-          <EntitySection type="date" label="Dates" items={dates} selectedId={selectedId} onSelectEntity={onSelectEntity} />
-          <EntitySection type="name" label="Names" items={names} selectedId={selectedId} onSelectEntity={onSelectEntity} />
-        </div>
+        <>
+          <div className="ents-scroll">
+            <EntitySection type="date" label="Dates" items={dates} selectedId={selectedId} onSelectEntity={onSelectEntity} />
+            <EntitySection type="name" label="Names" items={names} selectedId={selectedId} onSelectEntity={onSelectEntity} />
+          </div>
+          <div className="kbd-bar">
+            <span className="kbd-hint"><span className="kbd">↑</span><span className="kbd">↓</span> navigate</span>
+            <span className="kbd-hint"><span className="kbd">↵</span> jump</span>
+            <span className="kbd-hint"><span className="kbd">R</span> redact</span>
+          </div>
+        </>
       )}
     </aside>
   )

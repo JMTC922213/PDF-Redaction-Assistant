@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import TopBar from './components/TopBar.jsx'
 import ThumbnailRail from './components/ThumbnailRail.jsx'
 import PdfViewer from './components/PdfViewer.jsx'
 import EntityPanel from './components/EntityPanel.jsx'
 import { usePdfDocument } from './hooks/usePdfDocument.js'
 import { useEntities } from './hooks/useEntities.js'
+import { useKeyboardNav } from './hooks/useKeyboardNav.js'
 
 const ZOOM_STEP = 0.2
 const ZOOM_MIN = 0.5
@@ -26,15 +27,18 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [zoom, setZoom] = useState(1)
   const [selectedId, setSelectedId] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [activeSearch, setActiveSearch] = useState(0)
 
   const { status, pdf, numPages, error } = usePdfDocument(file)
   const { entities, pageModels, extracting } = useEntities(pdf, numPages)
 
-  // Whenever a new document loads, snap back to page 1 and clear any selection.
+  // Whenever a new document loads, reset page/selection/search.
   useEffect(() => {
     if (pdf) {
       setCurrentPage(1)
       setSelectedId(null)
+      setSearchTerm('')
     }
   }, [pdf])
 
@@ -43,12 +47,51 @@ export default function App() {
     setFile(f)
   }
 
-  // Clicking an entity selects it and jumps to its page. The on-page highlight
-  // box is added in Step 4 (needs the match→rect mapper).
-  function selectEntity(entity) {
+  // Clicking an entity selects it and jumps to its page; the highlight layer
+  // then boxes + scrolls to it. useCallback keeps the keyboard hook stable.
+  const selectEntity = useCallback((entity) => {
     setSelectedId(entity.id)
     setCurrentPage(entity.page)
-  }
+  }, [])
+
+  // Document-wide search: find every case-insensitive occurrence of the term
+  // across all page text models. ≥2 chars to avoid flooding on a single letter.
+  const searchMatches = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase()
+    if (term.length < 2) return []
+    const out = []
+    for (let n = 1; n <= numPages; n++) {
+      const model = pageModels[n]
+      if (!model) continue
+      const hay = model.text.toLowerCase()
+      let i = hay.indexOf(term)
+      let k = 0
+      while (i !== -1) {
+        out.push({ id: `s-${n}-${k}`, page: n, range: { start: i, end: i + term.length } })
+        i = hay.indexOf(term, i + term.length)
+        k++
+      }
+    }
+    return out
+  }, [searchTerm, pageModels, numPages])
+
+  // When the result set changes, reset to the first match and jump to its page.
+  useEffect(() => {
+    setActiveSearch(0)
+    if (searchMatches.length) setCurrentPage(searchMatches[0].page)
+  }, [searchMatches])
+
+  const goSearch = useCallback(
+    (dir) => {
+      if (!searchMatches.length) return
+      const next = (activeSearch + dir + searchMatches.length) % searchMatches.length
+      setActiveSearch(next)
+      setCurrentPage(searchMatches[next].page)
+    },
+    [searchMatches, activeSearch],
+  )
+
+  useKeyboardNav({ entities, selectedId, onSelect: selectEntity })
 
   const goToPage = (n) => setCurrentPage(clamp(n, 1, numPages || 1))
   const zoomIn = () => setZoom((z) => clamp(+(z + ZOOM_STEP).toFixed(2), ZOOM_MIN, ZOOM_MAX))
@@ -56,7 +99,17 @@ export default function App() {
 
   return (
     <div className="rm rm-clarity">
-      <TopBar status={status} fileName={file?.name} onFile={handleFile} />
+      <TopBar
+        status={status}
+        fileName={file?.name}
+        onFile={handleFile}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        matchCount={searchMatches.length}
+        activeIndex={activeSearch}
+        onNextMatch={() => goSearch(1)}
+        onPrevMatch={() => goSearch(-1)}
+      />
       <div className="rm-body">
         <ThumbnailRail
           status={status}
@@ -77,6 +130,8 @@ export default function App() {
           pageModels={pageModels}
           selectedId={selectedId}
           onSelectEntity={selectEntity}
+          searchMatches={searchMatches}
+          activeSearchId={searchMatches[activeSearch]?.id ?? null}
           onFile={handleFile}
           onPrev={() => goToPage(currentPage - 1)}
           onNext={() => goToPage(currentPage + 1)}

@@ -5,8 +5,18 @@ import { IconShield, IconFile, IconSearch } from './icons.jsx'
  * TopBar — brand, loaded-file chip, search bar, and primary actions.
  * Search and Export only appear once a document is loaded.
  */
-export default function TopBar({ status, fileName, onFile }) {
+export default function TopBar({
+  status, fileName, onFile,
+  searchTerm, onSearchChange, matchCount, activeIndex, onNextMatch, onPrevMatch,
+}) {
   const ready = status === 'ready'
+
+  function handleSearchKey(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      e.shiftKey ? onPrevMatch() : onNextMatch()
+    }
+  }
 
   return (
     <header className="topbar">
@@ -23,9 +33,21 @@ export default function TopBar({ status, fileName, onFile }) {
       )}
 
       {ready && (
-        <div className="searchbar">
+        <div className={'searchbar' + (searchTerm ? ' is-active' : '')}>
           <span className="search-ico"><IconSearch /></span>
-          <input type="text" placeholder="Search document…" aria-label="Search document" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={handleSearchKey}
+            placeholder="Search document…"
+            aria-label="Search document"
+          />
+          {searchTerm.trim().length >= 2 && (
+            <span className="search-count" title="Enter: next · Shift+Enter: previous">
+              {matchCount ? activeIndex + 1 : 0} / {matchCount}
+            </span>
+          )}
         </div>
       )}
 
